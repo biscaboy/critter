@@ -1,4 +1,4 @@
-package com.udacity.jdnd.course3.critter;
+package com.udacity.jdnd.course3.critter.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
