@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Launches the Spring application. Unmodified from starter code.
+ *
+ * Sources
+ * 	 Satish Varma - Mapping Collections of Basic Value Types - https://javabydeveloper.com/mapping-collection-of-basic-value-types-jpa-with-hibernate/
  */
 @SpringBootApplication
 public class CritterApplication {

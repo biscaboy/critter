@@ -4,9 +4,12 @@ import com.udacity.jdnd.course3.critter.dto.CustomerDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeRequestDTO;
 import com.udacity.jdnd.course3.critter.entity.Customer;
+import com.udacity.jdnd.course3.critter.entity.Employee;
 import com.udacity.jdnd.course3.critter.entity.Pet;
 import com.udacity.jdnd.course3.critter.entity.User;
 import com.udacity.jdnd.course3.critter.service.UserService;
+import com.udacity.jdnd.course3.critter.service.exceptions.CustomerNotFoundException;
+import com.udacity.jdnd.course3.critter.service.exceptions.EmployeeNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +44,12 @@ public class UserController {
         Long id = Optional.ofNullable(customerDTO.getId()).orElse(Long.valueOf(-1));
 
         // get the customer if it exists
-        Customer c = userService.findCustomer(id).orElse(new Customer());
+        Customer c = null;
+        try {
+            userService.findCustomer(id);
+        } catch (CustomerNotFoundException exception) {
+            c = new Customer();
+        }
 
         // copy user input to the existing customer
         // TODO validate data presences not to lose data?
@@ -72,12 +80,28 @@ public class UserController {
 
     @PostMapping("/employee")
     public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
-        throw new UnsupportedOperationException();
+        // get the customer if it exists
+        Employee e = null;
+        try {
+            userService.findEmployee(employeeDTO.getId());
+        } catch (EmployeeNotFoundException exception) {
+            e = new Employee();
+        }
+        // copy user input to the existing customer
+        // TODO validate data presences not to lose data?
+        BeanUtils.copyProperties(employeeDTO, e);
+        // save the merged customer and get the updated copy
+        e = userService.save(e);
+        // return the updated DTO
+        return new EmployeeDTO(e.getId(), e.getName(), e.getSkills(), e.getDaysAvailable());
     }
 
     @PostMapping("/employee/{employeeId}")
-    public EmployeeDTO getEmployee(@PathVariable long employeeId) {
-        throw new UnsupportedOperationException();
+    public EmployeeDTO getEmployee(@PathVariable long employeeId) throws EmployeeNotFoundException {
+        // is the id null?
+        Long id = Optional.ofNullable(employeeId).orElse(Long.valueOf(-1));
+        Employee e = userService.findEmployee(id);
+        return new EmployeeDTO(e.getId(), e.getName(), e.getSkills(), e.getDaysAvailable());
     }
 
     @PutMapping("/employee/{employeeId}")
@@ -115,4 +139,5 @@ public class UserController {
 
         return c;
     }
+
 }

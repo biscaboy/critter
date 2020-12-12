@@ -12,12 +12,6 @@ import java.util.List;
 @Table(name="CUSTOMER")
 public class Customer extends User {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-//    @JsonView(Views.Internal.class)
-//    @Column(name = "CUSTOMER_ID")
-//    private Long id;
-
     @JsonView(Views.Public.class)
     private String phoneNumber;
 
