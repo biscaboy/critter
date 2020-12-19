@@ -5,13 +5,13 @@ import com.udacity.jdnd.course3.critter.dto.EmployeeDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeRequestDTO;
 import com.udacity.jdnd.course3.critter.entity.Customer;
 import com.udacity.jdnd.course3.critter.entity.Employee;
+import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
 import com.udacity.jdnd.course3.critter.entity.Pet;
-import com.udacity.jdnd.course3.critter.entity.User;
 import com.udacity.jdnd.course3.critter.service.UserService;
-import com.udacity.jdnd.course3.critter.service.exceptions.CustomerNotFoundException;
-import com.udacity.jdnd.course3.critter.service.exceptions.EmployeeNotFoundException;
+import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
+import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.MissingRequiredPropertiesException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Handles web requests related to Users.
@@ -75,9 +76,11 @@ public class UserController {
 
     @GetMapping("/customer/pet/{petId}")
     public CustomerDTO getOwnerByPet(@PathVariable long petId){
-        throw new UnsupportedOperationException();
+        Customer c = userService.findOwnerByPet(Long.valueOf(petId));
+        return convertCustomerToDTO(c);
     }
 
+    @Transactional
     @PostMapping("/employee")
     public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
         // get the customer if it exists
@@ -93,7 +96,7 @@ public class UserController {
         // save the merged customer and get the updated copy
         e = userService.save(e);
         // return the updated DTO
-        return new EmployeeDTO(e.getId(), e.getName(), e.getSkills(), e.getDaysAvailable());
+        return copyEmployeeToDTO(e);
     }
 
     @PostMapping("/employee/{employeeId}")
@@ -101,33 +104,42 @@ public class UserController {
         // is the id null?
         Long id = Optional.ofNullable(employeeId).orElse(Long.valueOf(-1));
         Employee e = userService.findEmployee(id);
-        return new EmployeeDTO(e.getId(), e.getName(), e.getSkills(), e.getDaysAvailable());
+        return copyEmployeeToDTO(e);
     }
 
+    @Transactional
     @PutMapping("/employee/{employeeId}")
-    public void setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) {
-        throw new UnsupportedOperationException();
+    public void setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) throws EmployeeNotFoundException {
+        Employee e = userService.findEmployee(employeeId);
+        e.setDaysAvailable(daysAvailable);
+        userService.save(e);
     }
 
     @GetMapping("/employee/availability")
-    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) {
-        throw new UnsupportedOperationException();
+    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) throws MissingRequiredPropertiesException {
+        // got skills?
+        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills()).orElseThrow(MissingRequiredPropertiesException::new);
+        List<Employee> employees = userService.findEmployeesBySkill(skills);
+        return employees.stream().map(this::copyEmployeeToDTO).collect(Collectors.toList());
+    }
+
+    private EmployeeDTO copyEmployeeToDTO(Employee employee) {
+        EmployeeDTO dto = new EmployeeDTO();
+        BeanUtils.copyProperties(employee, dto);
+        return dto;
     }
 
     private CustomerDTO convertCustomerToDTO(Customer c){
         CustomerDTO dto = new CustomerDTO();
         BeanUtils.copyProperties(c, dto);
-        Optional.ofNullable(c.getPets())
-                .ifPresent( pets -> {
-                    pets.forEach( pet -> {
-                        dto.getPetIds().add(pet.getId());
-                    });
-                });
+        c.getPets().forEach( pet -> {
+            dto.getPetIds().add(pet.getId());
+        });
         return dto;
     }
 
     private Customer copyDTOtoCustomer(Customer c, CustomerDTO dto) {
-        BeanUtils.copyProperties(c, dto); // TODO buggy? May step on something?
+        BeanUtils.copyProperties(dto, c); // TODO buggy? May step on something?
         Optional.ofNullable(dto.getPetIds())
                 .ifPresent((List petIdsList) -> {
                     petIdsList.forEach( pId -> {

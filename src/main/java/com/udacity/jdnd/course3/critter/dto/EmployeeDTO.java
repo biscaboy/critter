@@ -16,14 +16,14 @@ public class EmployeeDTO {
     private Set<EmployeeSkill> skills;
     private Set<DayOfWeek> daysAvailable;
 
-    public EmployeeDTO() {}
-
-    public EmployeeDTO(long id, String name, Set<EmployeeSkill> skills, Set<DayOfWeek> daysAvailable){
-        this.id = id;
-        this.name = name;
-        this.skills = skills;
-        this.daysAvailable = daysAvailable;
-    }
+//    public EmployeeDTO() {}
+//
+//    public EmployeeDTO(long id, String name, Set<EmployeeSkill> skills, Set<DayOfWeek> daysAvailable){
+//        this.id = id;
+//        this.name = name;
+//        this.skills = skills;
+//        this.daysAvailable = daysAvailable;
+//    }
 
     public long getId() {
         return id;

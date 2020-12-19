@@ -8,7 +8,7 @@ import org.hibernate.annotations.Nationalized;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "USER")
+@Table(name = "user")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 public class User {

@@ -8,20 +8,20 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name="EMPLOYEE")
+@Table(name="employee")
 public class Employee extends User {
 
     @ElementCollection
     @CollectionTable(
-            name="EMPLOYEE_SKILL",
-            joinColumns = @JoinColumn(name="ID"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "SKILL"}))
-    @Column(name="SKILL")
+            name="employee_skill",
+            joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "SKILL"}))
+    @Column(name="skill")
     private Set<EmployeeSkill> skills;
 
     @ElementCollection
     @CollectionTable(
-            name="DAY_OF_WEEK",
-            joinColumns = @JoinColumn(name="ID"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "DAY"}))
-    @Column(name="DAY")
+            name="day_of_week",
+            joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "DAY"}))
+    @Column(name="day")
     private Set<DayOfWeek> daysAvailable;
 }

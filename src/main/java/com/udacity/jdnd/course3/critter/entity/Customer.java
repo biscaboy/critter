@@ -1,15 +1,17 @@
 package com.udacity.jdnd.course3.critter.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.udacity.jdnd.course3.critter.filter.Views;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Data
-@Table(name="CUSTOMER")
+@Table(name="customer")
 public class Customer extends User {
 
     @JsonView(Views.Public.class)
@@ -21,5 +23,6 @@ public class Customer extends User {
 
     @JsonView(Views.Internal.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pet> pets;
+    @JsonIgnoreProperties("owner")
+    private List<Pet> pets = new ArrayList<>();
 }
