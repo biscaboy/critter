@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -27,8 +29,8 @@ public class UserService {
     @Autowired
     EmployeeManagedRepository employeeManagedRepository;
 
-    public Customer findCustomer(Long id) throws CustomerNotFoundException {
-        return customerRepository.findById(id).orElseThrow(CustomerNotFoundException::new);
+    public Optional<Customer> findCustomer(Long id) {
+        return customerRepository.findById(id);
     }
 
     public Customer save(Customer c) {
@@ -54,11 +56,22 @@ public class UserService {
     public List<Employee> findEmployeesBySkill(Set<EmployeeSkill> skills) {
         // if there is more than one skill Hibernate does not support queries on @EnumeratedCollections
         // So get the ids of the employees with all skills and then pull just those employees from the database.
-        if (skills.size() > 1){
             List<Long> employeesIdsWithAllSkills = employeeManagedRepository.findEmployeeWithAllSkills(skills);
-            return employeeRepository.findAllById(employeesIdsWithAllSkills);
-        } else {
-            return employeeRepository.findBySkillsIn(skills);
+            List<Employee> employees = employeeRepository.findAllById(employeesIdsWithAllSkills);
+            return employees;
+    }
+
+    public List<Employee> findEmployees(List<Long> employeeIds) throws EmployeeNotFoundException {
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
+
+        // TODO Test this exception situation
+        if (employeeIds.size() != employees.size()) {
+            List<Long> found = employees.stream().map(e -> e.getId()).collect(Collectors.toList());
+            String missing = employeeIds.stream().map(id -> {
+               return (found.contains(id)) ? "" : id;
+            }).collect(Collectors.toList()).toString();
+            throw new EmployeeNotFoundException("Could not find employee(s) with id(s): " + missing);
         }
+        return employees;
     }
 }

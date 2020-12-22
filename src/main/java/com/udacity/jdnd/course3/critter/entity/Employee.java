@@ -1,13 +1,21 @@
 package com.udacity.jdnd.course3.critter.entity;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name="employee")
 public class Employee extends User {
 
@@ -24,4 +32,11 @@ public class Employee extends User {
             joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "DAY"}))
     @Column(name="day")
     private Set<DayOfWeek> daysAvailable;
+
+    @ManyToMany(
+            mappedBy = "employees")
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @JsonManagedReference
+    @JsonIgnoreProperties("schedules")
+    private List<Schedule> schedules = new ArrayList<>();
 }

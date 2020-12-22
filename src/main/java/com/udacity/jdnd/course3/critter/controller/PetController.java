@@ -3,13 +3,13 @@ package com.udacity.jdnd.course3.critter.controller;
 import com.udacity.jdnd.course3.critter.dto.PetDTO;
 import com.udacity.jdnd.course3.critter.entity.Customer;
 import com.udacity.jdnd.course3.critter.entity.Pet;
+import com.udacity.jdnd.course3.critter.exceptions.MissingParameterException;
 import com.udacity.jdnd.course3.critter.service.PetService;
 import com.udacity.jdnd.course3.critter.service.UserService;
 import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
 import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.MissingRequiredPropertiesException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequestMapping("/pet")
 public class PetController {
 
-    private static final String []  PROPERTIES_TO_IGNORE_ON_COPY = { "owner" };
+    private static final String []  PROPERTIES_TO_IGNORE_ON_COPY = { "id" };
 
     @Autowired
     PetService petService;
@@ -33,26 +33,28 @@ public class PetController {
     UserService userService;
 
     @Transactional
+    @PostMapping("/{ownerId}")
+    public PetDTO updatePet(@PathVariable(name="ownerId") Long ownerId, @RequestBody PetDTO petDTO){
+        petDTO.setOwnerId(ownerId);
+        return savePet(petDTO);
+    }
+
+    @Transactional
     @PostMapping
-    public PetDTO savePet(@RequestBody PetDTO petDTO) throws CustomerNotFoundException, MissingRequiredPropertiesException {
+    public PetDTO savePet(@RequestBody PetDTO petDTO) throws CustomerNotFoundException, MissingParameterException {
         // is the id null?
         long petId = Optional.ofNullable(petDTO.getId()).orElse(-1L);
-        Long ownerId = Optional.ofNullable(petDTO.getOwnerId()).orElseThrow(MissingRequiredPropertiesException::new);
+        Long ownerId = Optional.ofNullable(petDTO.getOwnerId()).orElseThrow(() -> new MissingParameterException("Owner ID missing."));
 
         // get the pet if it exists
-        Pet p = null;
-        try {
-            p = petService.findPet(Long.valueOf(petId));
-        } catch (PetNotFoundException exception) {
-            p = new Pet();
-        }
+        Pet p = petService.findPet(Long.valueOf(petId)).orElseGet(Pet::new);
 
         // copy user input to the existing pet
         // TODO validate data presences not to lose data?
         BeanUtils.copyProperties(petDTO, p, PROPERTIES_TO_IGNORE_ON_COPY);
 
         // get the owner ids
-        Customer owner = userService.findCustomer(ownerId);
+        Customer owner = userService.findCustomer(ownerId).orElseThrow(CustomerNotFoundException::new);
         p.setOwner(owner);
         // save the merged customer and get the updated copy
         p = petService.save(p);
@@ -63,7 +65,7 @@ public class PetController {
 
         // return the updated DTO
         PetDTO dto = new PetDTO();
-        BeanUtils.copyProperties(p, dto, PROPERTIES_TO_IGNORE_ON_COPY);
+        BeanUtils.copyProperties(p, dto);
         dto.setOwnerId(p.getOwner().getId());
         return dto;
     }
@@ -71,22 +73,26 @@ public class PetController {
     @GetMapping("/{petId}")
     public PetDTO getPet(@PathVariable long petId) throws PetNotFoundException {
         PetDTO dto = new PetDTO();
-        Pet p = petService.findPet(petId);
-        BeanUtils.copyProperties(p, dto, PROPERTIES_TO_IGNORE_ON_COPY);
+        Pet p = petService.findPet(petId).orElseThrow(PetNotFoundException::new);
+        BeanUtils.copyProperties(p, dto);
         dto.setOwnerId(p.getOwner().getId());
         return dto;
     }
 
     @GetMapping
     public List<PetDTO> getPets(){
-        throw new UnsupportedOperationException();
+        List<Pet> pets = petService.findAllPets();
+        return copyPetsToPetsDTO(pets);
     }
 
     @GetMapping("/owner/{ownerId}")
     public List<PetDTO> getPetsByOwner(@PathVariable long ownerId) {
-        List<PetDTO> dtos = new ArrayList<>();
         List<Pet> pets = petService.findPetByOwner(Long.valueOf(ownerId));
+        return copyPetsToPetsDTO(pets);
+    }
 
+    private List<PetDTO> copyPetsToPetsDTO(List<Pet> pets) {
+        List<PetDTO> dtos = new ArrayList<>();
         pets.forEach(pet -> {
             dtos.add(new PetDTO(
                     pet.getId().longValue(),

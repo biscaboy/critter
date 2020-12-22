@@ -7,11 +7,12 @@ import com.udacity.jdnd.course3.critter.entity.Customer;
 import com.udacity.jdnd.course3.critter.entity.Employee;
 import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
 import com.udacity.jdnd.course3.critter.entity.Pet;
+import com.udacity.jdnd.course3.critter.exceptions.MissingParameterException;
+import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
+import com.udacity.jdnd.course3.critter.service.PetService;
 import com.udacity.jdnd.course3.critter.service.UserService;
-import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
 import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.env.MissingRequiredPropertiesException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -32,52 +33,37 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 public class UserController {
 
+    private static final String []  PROPERTIES_TO_IGNORE_ON_COPY = { "id" };
+
     private UserService userService;
 
-    public UserController(UserService userService) {
+    private PetService petService;
+
+    public UserController(UserService userService, PetService petService) {
         this.userService = userService;
+        this.petService = petService;
     }
 
     @Transactional
     @PostMapping("/customer")
     public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
-        // is the id null?
         Long id = Optional.ofNullable(customerDTO.getId()).orElse(Long.valueOf(-1));
-
-        // get the customer if it exists
-        Customer c = null;
-        try {
-            userService.findCustomer(id);
-        } catch (CustomerNotFoundException exception) {
-            c = new Customer();
-        }
-
-        // copy user input to the existing customer
-        // TODO validate data presences not to lose data?
-        this.copyDTOtoCustomer(c, customerDTO);
-        // save the merged customer and get the updated copy
+        Customer c = userService.findCustomer(id).orElseGet(Customer::new);
+        this.copyDTOtoCustomer(customerDTO, c);
         c = userService.save(c);
-        // return the updated DTO
-        return convertCustomerToDTO(c);
+        return copyCustomerToDTO(c);
     }
 
     @GetMapping("/customer")
     public List<CustomerDTO> getAllCustomers(){
-        // get all the customers
-        List customers = userService.getAllCustomers();
-
-        List dtos = new ArrayList<CustomerDTO>();
-        // convert to DTO
-        customers.forEach( c -> {
-            dtos.add(this.convertCustomerToDTO((Customer)c));
-        });
-        return dtos;
+        List<Customer> customers = userService.getAllCustomers();
+        return copyCustomersToDTOs(customers);
     }
 
     @GetMapping("/customer/pet/{petId}")
-    public CustomerDTO getOwnerByPet(@PathVariable long petId){
-        Customer c = userService.findOwnerByPet(Long.valueOf(petId));
-        return convertCustomerToDTO(c);
+    public CustomerDTO getOwnerByPet(@PathVariable long petId) throws PetNotFoundException{
+        Pet p = petService.findPet(petId).orElseThrow(PetNotFoundException::new);
+        return copyCustomerToDTO(p.getOwner());
     }
 
     @Transactional
@@ -86,13 +72,13 @@ public class UserController {
         // get the customer if it exists
         Employee e = null;
         try {
-            userService.findEmployee(employeeDTO.getId());
+            e = userService.findEmployee(employeeDTO.getId());
         } catch (EmployeeNotFoundException exception) {
             e = new Employee();
         }
         // copy user input to the existing customer
         // TODO validate data presences not to lose data?
-        BeanUtils.copyProperties(employeeDTO, e);
+        BeanUtils.copyProperties(employeeDTO, e, PROPERTIES_TO_IGNORE_ON_COPY);
         // save the merged customer and get the updated copy
         e = userService.save(e);
         // return the updated DTO
@@ -116,9 +102,9 @@ public class UserController {
     }
 
     @GetMapping("/employee/availability")
-    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) throws MissingRequiredPropertiesException {
+    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) throws MissingParameterException {
         // got skills?
-        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills()).orElseThrow(MissingRequiredPropertiesException::new);
+        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills()).orElseThrow(() -> new MissingParameterException("Employee skills missing."));
         List<Employee> employees = userService.findEmployeesBySkill(skills);
         return employees.stream().map(this::copyEmployeeToDTO).collect(Collectors.toList());
     }
@@ -129,7 +115,7 @@ public class UserController {
         return dto;
     }
 
-    private CustomerDTO convertCustomerToDTO(Customer c){
+    private CustomerDTO copyCustomerToDTO(Customer c){
         CustomerDTO dto = new CustomerDTO();
         BeanUtils.copyProperties(c, dto);
         c.getPets().forEach( pet -> {
@@ -138,8 +124,17 @@ public class UserController {
         return dto;
     }
 
-    private Customer copyDTOtoCustomer(Customer c, CustomerDTO dto) {
-        BeanUtils.copyProperties(dto, c); // TODO buggy? May step on something?
+    private List<CustomerDTO> copyCustomersToDTOs (List<Customer> customers) {
+        List dtos = new ArrayList<CustomerDTO>();
+        // convert to DTO
+        customers.forEach( c -> {
+            dtos.add(this.copyCustomerToDTO((Customer)c));
+        });
+        return dtos;
+    }
+
+    private Customer copyDTOtoCustomer(CustomerDTO dto, Customer c) {
+        BeanUtils.copyProperties(dto, c, PROPERTIES_TO_IGNORE_ON_COPY);
         Optional.ofNullable(dto.getPetIds())
                 .ifPresent((List petIdsList) -> {
                     petIdsList.forEach( pId -> {

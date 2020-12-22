@@ -42,7 +42,7 @@ public class EmployeeManagedRepository {
 
         // using the above statement and the skills given, construct an INTERSECT statement.
         // only the employees that have all the skills required will show up in the result of each query.
-        // TODO is there a qurey that will only select once instead of multiple selects?  Count projection??
+        // TODO is there a query that will only select once instead of multiple selects?  Count projection??
         int i = 0;
         String selectQuery = skillsQuery + " :skills_id_0";
         for (EmployeeSkill skill : skillsSet) {
@@ -50,8 +50,9 @@ public class EmployeeManagedRepository {
             String key = "skills_id_" + i;
             skillsIdMap.put(key, skill.ordinal());
             if (i > 0) {
-                selectQuery = " INTERSECT " + skillsQuery + " :" + key;
+                selectQuery += " INTERSECT " + skillsQuery + " :" + key;
             }
+            i++;
         }
 
         // Create the query and set parameters

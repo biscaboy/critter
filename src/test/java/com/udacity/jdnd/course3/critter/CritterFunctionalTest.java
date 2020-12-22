@@ -54,10 +54,6 @@ public class CritterFunctionalTest {
         Assertions.assertEquals(newCustomer.getName(), customerDTO.getName());
         Assertions.assertEquals(newCustomer.getId(), retrievedCustomer.getId());
         Assertions.assertTrue(retrievedCustomer.getId() > 0);
-        // Added assertions in addition to required assertions above.
-        Assertions.assertEquals(customerDTO.getName(), retrievedCustomer.getName());
-        Assertions.assertEquals(customerDTO.getPhoneNumber(), retrievedCustomer.getPhoneNumber());
-        Assertions.assertEquals(newCustomer.getPhoneNumber(), retrievedCustomer.getPhoneNumber());
     }
 
     @Test
