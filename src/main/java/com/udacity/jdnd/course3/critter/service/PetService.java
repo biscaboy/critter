@@ -1,7 +1,6 @@
 package com.udacity.jdnd.course3.critter.service;
 
 import com.udacity.jdnd.course3.critter.entity.Pet;
-import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
 import com.udacity.jdnd.course3.critter.repository.PetRepository;
 import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +31,13 @@ public class PetService {
     public List<Pet> findPets(List<Long> petIds) {
         List<Pet> pets = petRepository.findAllById(petIds);
 
-        // TODO Test this exception situation
         if (petIds.size() != pets.size()) {
             List<Long> found = pets.stream().map(p -> p.getId()).collect(Collectors.toList());
-            String missing = petIds.stream().map(id -> {
-                return (found.contains(id)) ? "" : id;
-            }).collect(Collectors.toList()).toString();
+            String missing = (String) petIds
+                    .stream()
+                    .filter( id -> !found.contains(id) )
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
             throw new PetNotFoundException("Could not find pet(s) with id(s): " + missing);
         }
         return pets;

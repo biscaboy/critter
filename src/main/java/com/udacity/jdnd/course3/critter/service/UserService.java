@@ -46,30 +46,31 @@ public class UserService {
     }
 
     public Employee findEmployee(Long id) throws EmployeeNotFoundException {
-        return employeeRepository.findById(id).orElseThrow(EmployeeNotFoundException::new);
+        return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("ID: " + id));
     }
 
     public Customer findOwnerByPet(Long id) throws CustomerNotFoundException {
-        return customerRepository.findOptionalByPetId(id).orElseThrow(CustomerNotFoundException::new);
+        return customerRepository.findOptionalByPetId(id).orElseThrow(() -> new EmployeeNotFoundException("ID: " + id));
     }
 
     public List<Employee> findEmployeesBySkill(Set<EmployeeSkill> skills) {
         // if there is more than one skill Hibernate does not support queries on @EnumeratedCollections
         // So get the ids of the employees with all skills and then pull just those employees from the database.
-            List<Long> employeesIdsWithAllSkills = employeeManagedRepository.findEmployeeWithAllSkills(skills);
-            List<Employee> employees = employeeRepository.findAllById(employeesIdsWithAllSkills);
-            return employees;
+        List<Long> employeesIds = employeeManagedRepository.findEmployeeIdsWithAllSkills(skills);
+        List<Employee> employees = employeeRepository.findAllById(employeesIds);
+        return employees;
     }
 
     public List<Employee> findEmployees(List<Long> employeeIds) throws EmployeeNotFoundException {
         List<Employee> employees = employeeRepository.findAllById(employeeIds);
 
-        // TODO Test this exception situation
         if (employeeIds.size() != employees.size()) {
             List<Long> found = employees.stream().map(e -> e.getId()).collect(Collectors.toList());
-            String missing = employeeIds.stream().map(id -> {
-               return (found.contains(id)) ? "" : id;
-            }).collect(Collectors.toList()).toString();
+            String missing = (String) employeeIds
+                    .stream()
+                    .filter( id -> !found.contains(id) )
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
             throw new EmployeeNotFoundException("Could not find employee(s) with id(s): " + missing);
         }
         return employees;

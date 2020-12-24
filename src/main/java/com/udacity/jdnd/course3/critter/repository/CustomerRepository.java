@@ -5,10 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
-@Transactional
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query(value = "SELECT * FROM Customer AS c INNER JOIN User AS u ON u.id = c.id INNER JOIN Pet AS p ON c.id = p.owner_id where p.id = :id", nativeQuery = true)

@@ -1,5 +1,6 @@
 package com.udacity.jdnd.course3.critter.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.udacity.jdnd.course3.critter.dto.CustomerDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeRequestDTO;
@@ -9,6 +10,7 @@ import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
 import com.udacity.jdnd.course3.critter.entity.Pet;
 import com.udacity.jdnd.course3.critter.exceptions.MissingParameterException;
 import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
+import com.udacity.jdnd.course3.critter.filter.Views;
 import com.udacity.jdnd.course3.critter.service.PetService;
 import com.udacity.jdnd.course3.critter.service.UserService;
 import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
@@ -17,10 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,28 +43,37 @@ public class UserController {
         this.petService = petService;
     }
 
+    @JsonView(Views.Public.class)
     @Transactional
     @PostMapping("/customer")
     public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
         Long id = Optional.ofNullable(customerDTO.getId()).orElse(Long.valueOf(-1));
         Customer c = userService.findCustomer(id).orElseGet(Customer::new);
-        this.copyDTOtoCustomer(customerDTO, c);
+        BeanUtils.copyProperties(customerDTO, c, PROPERTIES_TO_IGNORE_ON_COPY);
+        List<Long> petIds = Optional.ofNullable(customerDTO.getPetIds()).orElseGet(ArrayList::new);
+        c.setPets(petIds.stream().map((petId) -> {
+                return petService.findPet(petId)
+                    .orElseThrow(() -> new PetNotFoundException("ID: " + petId));
+            }).collect(Collectors.toList()));
         c = userService.save(c);
         return copyCustomerToDTO(c);
     }
 
+    @JsonView(Views.Public.class)
     @GetMapping("/customer")
     public List<CustomerDTO> getAllCustomers(){
         List<Customer> customers = userService.getAllCustomers();
         return copyCustomersToDTOs(customers);
     }
 
+    @JsonView(Views.Public.class)
     @GetMapping("/customer/pet/{petId}")
     public CustomerDTO getOwnerByPet(@PathVariable long petId) throws PetNotFoundException{
-        Pet p = petService.findPet(petId).orElseThrow(PetNotFoundException::new);
+        Pet p = petService.findPet(petId).orElseThrow(() -> new PetNotFoundException("ID: " + petId));
         return copyCustomerToDTO(p.getOwner());
     }
 
+    @JsonView(Views.Public.class)
     @Transactional
     @PostMapping("/employee")
     public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
@@ -77,7 +85,6 @@ public class UserController {
             e = new Employee();
         }
         // copy user input to the existing customer
-        // TODO validate data presences not to lose data?
         BeanUtils.copyProperties(employeeDTO, e, PROPERTIES_TO_IGNORE_ON_COPY);
         // save the merged customer and get the updated copy
         e = userService.save(e);
@@ -85,6 +92,7 @@ public class UserController {
         return copyEmployeeToDTO(e);
     }
 
+    @JsonView(Views.Public.class)
     @PostMapping("/employee/{employeeId}")
     public EmployeeDTO getEmployee(@PathVariable long employeeId) throws EmployeeNotFoundException {
         // is the id null?
@@ -93,6 +101,7 @@ public class UserController {
         return copyEmployeeToDTO(e);
     }
 
+    @JsonView(Views.Public.class)
     @Transactional
     @PutMapping("/employee/{employeeId}")
     public void setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) throws EmployeeNotFoundException {
@@ -101,10 +110,12 @@ public class UserController {
         userService.save(e);
     }
 
+    @JsonView(Views.Public.class)
     @GetMapping("/employee/availability")
     public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) throws MissingParameterException {
         // got skills?
-        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills()).orElseThrow(() -> new MissingParameterException("Employee skills missing."));
+        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills())
+                .orElseThrow(() -> new MissingParameterException("Employee skills missing."));
         List<Employee> employees = userService.findEmployeesBySkill(skills);
         return employees.stream().map(this::copyEmployeeToDTO).collect(Collectors.toList());
     }
@@ -131,20 +142,6 @@ public class UserController {
             dtos.add(this.copyCustomerToDTO((Customer)c));
         });
         return dtos;
-    }
-
-    private Customer copyDTOtoCustomer(CustomerDTO dto, Customer c) {
-        BeanUtils.copyProperties(dto, c, PROPERTIES_TO_IGNORE_ON_COPY);
-        Optional.ofNullable(dto.getPetIds())
-                .ifPresent((List petIdsList) -> {
-                    petIdsList.forEach( pId -> {
-                        Pet p = new Pet(); // TODO replace these two lines with a call to service when it exists
-                        p.setId((Long) pId);
-                        c.getPets().add(p);
-                    });
-                });
-
-        return c;
     }
 
 }
