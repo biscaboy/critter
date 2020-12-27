@@ -208,15 +208,15 @@ public class CritterFunctionalTest {
         sched3.setPetIds(sched2.getPetIds());
 
         // The skills requested here were originally EmployeeSkill.SHAVING, EmployeeSkill.PETTING.
-        // Changed the activities to match the activities of the employee in schedule 1.
-        // This does not seem to have any effect on the assertions in the test.
-        // This allows the employee to be available and have the skills required for the scheduling request.
+        //   Changed the activities to match the activities of the employee in schedule 1.
+        //   This does not seem to have any effect on the assertions in the test.
+        //   This allows the employee to be available and have the skills required for the scheduling request.
         sched3.setActivities(Sets.newHashSet(EmployeeSkill.FEEDING, EmployeeSkill.WALKING));
 
         // The date requested here was originally 3/23/2020, but this is a MONDAY.
         //   The employee created with scehdules 1 above is available only on WEDNESDAYS.
         //   Because of this discrepancy the test fails.
-        //   It has been modified to include a date that the employee available.  (originally: 2020-3-23)
+        //   It has been modified to include a date that the employee is available.
         sched3.setDate(LocalDate.of(2020, 3, 25));
         scheduleController.createSchedule(sched3);
 
