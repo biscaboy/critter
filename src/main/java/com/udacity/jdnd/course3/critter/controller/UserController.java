@@ -48,16 +48,18 @@ public class UserController {
     @PostMapping("/customer")
     public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
 
-        // TODO - if this is an update handle it.  Updates currently throwing errors and returning status code 500
         // TODO - the bean utils copy is stepping on values if the dto is missing values.  Validate before copy.
         Long id = Optional.ofNullable(customerDTO.getId()).orElse(Long.valueOf(-1));
         Customer c = userService.findCustomer(id).orElseGet(Customer::new);
         BeanUtils.copyProperties(customerDTO, c, PROPERTIES_TO_IGNORE_ON_COPY);
+
         List<Long> petIds = Optional.ofNullable(customerDTO.getPetIds()).orElseGet(ArrayList::new);
-        c.setPets(petIds.stream().map((petId) -> {
-                return petService.findPet(petId)
-                    .orElseThrow(() -> new PetNotFoundException("ID: " + petId));
-            }).collect(Collectors.toList()));
+        c.getPets().clear();
+        for (Long petId : petIds) {
+             Pet p = petService.findPet(petId).orElseThrow(() -> new PetNotFoundException("ID: " + petId));
+             c.getPets().add(p);
+        }
+
         c = userService.save(c);
         return copyCustomerToDTO(c);
     }

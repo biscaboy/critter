@@ -85,7 +85,7 @@
 			"response": []
 		},
 		{
-			"name": "Save Customer (Chris add notes)",
+			"name": "Update Customer (Chris add notes)",
 			"event": [
 				{
 					"listen": "test",
@@ -148,7 +148,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"id\" : 1,\r\n  \"notes\" : \"Needs a about 5-10 extra minutes after we close to get here after work.\"\r\n}",
+					"raw": "{\r\n  \"id\" : 1,\r\n  \"name\": \"Chris\",\r\n  \"phoneNumber\": \"231-456-7890\",\r\n  \"notes\" : \"Needs a about 5-10 extra minutes after we close to get here after work.\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -708,6 +708,100 @@
 			"response": []
 		},
 		{
+			"name": "Update Pet (Gypsy edit note)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const petType = \"FERRET\"",
+							"const petName = \"Gypsy\"",
+							"const petBirthDate = \"2017-10-04\"",
+							"const petNotes = \"Gypsy hides when he's not sleeping.  Gray markings under tail.\"",
+							"const petOwnerId = 3",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(\"The response has a generated id\", () => {",
+							"    pm.expect(jsonData.id).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response object name is ${petName}`, () => {",
+							"    pm.expect(jsonData.name).equal(petName);",
+							"});",
+							"",
+							"pm.test(`The response object type ${petType}`, () => {",
+							"    pm.expect(jsonData.type).equal(petType);",
+							"});",
+							"",
+							"pm.test(`The response object birth day is ${petBirthDate}`, () => {",
+							"    pm.expect(jsonData.birthDate).equal(petBirthDate);",
+							"});",
+							"",
+							"pm.test(\"The response object notes is not null\", () => {",
+							"    pm.expect(jsonData.notes).is.not.null;",
+							"});",
+							"",
+							"pm.test(`The response object notes`, () => {",
+							"    pm.expect(jsonData.notes).equal(petNotes);",
+							"});",
+							"",
+							"pm.test(\"The response object ownerId is not null\", () => {",
+							"    pm.expect(jsonData.ownerId).is.not.null;",
+							"});",
+							"",
+							"pm.test(`The response object ownerId is ${petOwnerId}`, () => {",
+							"    pm.expect(jsonData.ownerId).equal(petOwnerId);",
+							"});",
+							"",
+							"console.log(`name/id: ${jsonData.name} : ${jsonData.id}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 7,\r\n  \"type\": \"FERRET\",\r\n  \"name\": \"Gypsy\",\r\n  \"birthDate\": \"2017-10-04T01:23:45.945Z\",\r\n  \"notes\": \"Gypsy hides when he's not sleeping.  Gray markings under tail.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/pet/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"pet",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Save Employee (Bill)",
 			"event": [
 				{
@@ -1142,6 +1236,93 @@
 			"response": []
 		},
 		{
+			"name": "Update Employee (Deeke - name & skills)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const employeeName = \"Deeky\"",
+							"const skills_first = \"SHAVING\"",
+							"const skills_last = \"MEDICATING\";",
+							"const skills_length = 3",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(\"The response has a generated id\", () => {",
+							"    pm.expect(jsonData.id).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response object name is ${employeeName}`, () => {",
+							"    pm.expect(jsonData.name).equal(employeeName);",
+							"});",
+							"",
+							"pm.test(\"The response object skills is null\", () => {",
+							"    pm.expect(jsonData.skills).not.to.be.null;",
+							"});",
+							"",
+							"pm.test(`The response object skills is length ${skills_length}`, () => {",
+							"    pm.expect(jsonData.skills.length).to.be.eql(skills_length);",
+							"});",
+							"",
+							"pm.test(`The response object skills has ${skills_first}`, () => {",
+							"    pm.expect(jsonData.skills).to.include(skills_first);",
+							"});",
+							"",
+							"if (skills_length > 1) {",
+							"    pm.test(`The response object skills has ${skills_last}`, () => {",
+							"        pm.expect(jsonData.skills).to.include(skills_last);",
+							"    });",
+							"}",
+							"",
+							"console.log(`name/id: ${jsonData.name} : ${jsonData.id}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 12,\r\n  \"name\": \"Deeky\",\r\n  \"skills\": [\"SHAVING\", \"PETTING\", \"MEDICATING\"]\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/user/employee",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"user",
+						"employee"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Add Employee Schedule (Bill)",
 			"event": [
 				{
@@ -1400,6 +1581,12 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
+							"const numEmployees = 1;",
+							"const numPets = 1;",
+							"const numActivites = 2;",
+							"const skills_first = \"WALKING\";",
+							"const skills_second = \"PETTING\";",
+							"",
 							"",
 							"pm.test(\"Status code is 200\", function () {",
 							"  pm.response.to.have.status(200);",
@@ -1409,8 +1596,99 @@
 							"    pm.expect(jsonData).to.be.not.null;",
 							"});",
 							"",
-							"pm.test(\"The response has a generated id\", () => {",
-							"    pm.expect(jsonData.id).to.be.not.null;",
+							"pm.test(`The response has ${numEmployees} employees`, () => {",
+							"    pm.expect(jsonData.employeeIds.length).to.be.eql(numEmployees);",
+							"});",
+							"",
+							"pm.test(`The response has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.petIds.length).to.be.eql(numPets);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} activities`, () => {",
+							"    pm.expect(jsonData.activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"pm.test(`The response object has the added new skill: ${skills_second}`, () => {",
+							"        pm.expect(jsonData.activities).to.include(skills_first);",
+							"        pm.expect(jsonData.activities).to.include(skills_second);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"employeeIds\" : [8],\n    \"petIds\" : [4],\n    \"date\" : \"2021-01-11\", \n    \"activities\" : [\n        \"PETTING\",\n        \"WALKING\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/schedule",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Schedule Second Pet for Service (Success)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numEmployees = 2;",
+							"const numPets = 1;",
+							"const numActivites = 1;",
+							"const skill = \"PETTING\";",
+							"",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numEmployees} employees`, () => {",
+							"    pm.expect(jsonData.employeeIds.length).to.be.eql(numEmployees);",
+							"});",
+							"",
+							"pm.test(`The response has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.petIds.length).to.be.eql(numPets);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} activities`, () => {",
+							"    pm.expect(jsonData.activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"pm.test(`The response object has skill: ${skill}`, () => {",
+							"        pm.expect(jsonData.activities).to.include(skill);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1429,7 +1707,83 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"employeeIds\" : [8],\n    \"petIds\" : [6],\n    \"date\" : \"2021-01-11\", \n    \"activities\" : [\n        \"PETTING\",\n        \"WALKING\"\n    ]\n}",
+					"raw": "{\n    \"employeeIds\" : [9,11],\n    \"petIds\" : [4],\n    \"date\" : \"2021-01-10\", \n    \"activities\" : [\n        \"PETTING\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/schedule",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Second Pet for Service (Success)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numPets = 2;",
+							"const numActivites = 3;",
+							"const skills_first = \"WALKING\";",
+							"const skills_second = \"PETTING\";",
+							"const skills_new = \"FEEDING\";",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.petIds.length).to.be.eql(numPets);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} activities`, () => {",
+							"    pm.expect(jsonData.activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"pm.test(`The response object has the added new skill: ${skills_second}`, () => {",
+							"        pm.expect(jsonData.activities).to.include(skills_first);",
+							"        pm.expect(jsonData.activities).to.include(skills_second);",
+							"        pm.expect(jsonData.activities).to.include(skills_new);    ",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": 14,\n    \"employeeIds\" : [8],\n    \"petIds\" : [5,6],\n    \"date\" : \"2021-01-11\", \n    \"activities\" : [\n        \"PETTING\",\n        \"WALKING\",\n        \"FEEDING\"\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1507,58 +1861,6 @@
 			"response": []
 		},
 		{
-			"name": "Schedule Pet for Service (Fail - No Employees)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 400\", function () {",
-							"  pm.response.to.have.status(400);",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"petIds\" : [4],\n    \"date\" : \"2021-01-13\", \n    \"activities\" : [\n        \"PETTING\",\n        \"WALKING\"\n    ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8082/schedule",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8082",
-					"path": [
-						"schedule"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Schedule Pet for Service (Fail - No Pets)",
 			"event": [
 				{
@@ -1566,11 +1868,15 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
+							"const errorMessage = \"Missing request parameter(s): Pet id(s).\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
 							"});",
 							"",
+							"pm.test(\"Expected error message\", function () {",
+							"    pm.expect(jsonData.message).equals(errorMessage);",
+							"});",
 							""
 						],
 						"type": "text/javascript"
@@ -1611,6 +1917,61 @@
 			"response": []
 		},
 		{
+			"name": "Schedule Pet for Service (Fail - No Employees)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const errorMessage = \"Missing request parameter(s): Employee id(s).\"",
+							"",
+							"pm.test(\"Status code is 400\", function () {",
+							"  pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Expected error message\", function () {",
+							"    pm.expect(jsonData.message).equals(errorMessage);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"petIds\" : [4],\n    \"date\" : \"2021-01-13\", \n    \"activities\" : [\n        \"PETTING\",\n        \"WALKING\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/schedule",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Schedule Pet for Service (Fail - No Date)",
 			"event": [
 				{
@@ -1618,9 +1979,14 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
+							"const errorMessage = \"Missing request parameter(s): service date.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Expected error message\", function () {",
+							"    pm.expect(jsonData.message).equals(errorMessage);",
 							"});",
 							"",
 							""
@@ -1663,19 +2029,22 @@
 			"response": []
 		},
 		{
-			"name": "Schedule Pet for Service (Fail - No Activites) Copy",
+			"name": "Schedule Pet for Service (Fail - No Activites)",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
+							"const errorMessage = \"Missing request parameter(s): activites.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
 							"});",
 							"",
-							""
+							"pm.test(\"Expected error message\", function () {",
+							"    pm.expect(jsonData.message).equals(errorMessage);",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -1694,6 +2063,61 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"employeeIds\" : [9],\n    \"petIds\" : [4],\n    \"date\" : \"2020-01-01\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/schedule",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"schedule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Schedule Pet for Service (Fail - Empty Request)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const errorMessage = \"Missing request parameter(s): service date, activites, Employee id(s), Pet id(s).\"",
+							"",
+							"pm.test(\"Status code is 400\", function () {",
+							"  pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Expected error message\", function () {",
+							"    pm.expect(jsonData.message).equals(errorMessage);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1887,6 +2311,52 @@
 		},
 		{
 			"name": "Find Schedule By Pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numEmployees = 1;",
+							"const employeeId = 8;",
+							"const date = \"2021-01-11\"",
+							"const numActivites = 2;",
+							"const skills_first = \"WALKING\";",
+							"const skills_second = \"PETTING\";",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numEmployees} employees`, () => {",
+							"    pm.expect(jsonData[0].employeeIds.length).to.be.eql(numEmployees);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} activities`, () => {",
+							"    pm.expect(jsonData[0].activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"",
+							"pm.test(`The response date ${date} correct`, () => {",
+							"    pm.expect(jsonData[0].date).equal(date);",
+							"});",
+							"",
+							"pm.test(`The response object has the right skills: ${skills_first} and ${skills_second}`, () => {",
+							"        pm.expect(jsonData[0].activities).to.include(skills_first);",
+							"        pm.expect(jsonData[0].activities).to.include(skills_second);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -1910,7 +2380,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8082/schedule/pet/6",
+					"raw": "http://localhost:8082/schedule/pet/4",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1919,7 +2389,7 @@
 					"path": [
 						"schedule",
 						"pet",
-						"6"
+						"4"
 					]
 				}
 			},
@@ -1927,6 +2397,49 @@
 		},
 		{
 			"name": "Find Schedule By Employee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numEmployees = 1;",
+							"const employeeId = 8;",
+							"const date = \"2021-01-11\"",
+							"const numActivites = 2;",
+							"const skills_first = \"WALKING\";",
+							"const skills_second = \"PETTING\";",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numEmployees} employees`, () => {",
+							"    pm.expect(jsonData[0].employeeIds.length).to.be.eql(numEmployees);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} employees`, () => {",
+							"    pm.expect(jsonData[0].activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"",
+							"pm.test(`The response date ${date} correct`, () => {",
+							"    pm.expect(jsonData[0].date).equal(date);",
+							"});",
+							"",
+							"pm.test(`The response object has the right skills: ${skills_first} and ${skills_second}`, () => {",
+							"        pm.expect(jsonData[0].activities).to.include(skills_first);",
+							"        pm.expect(jsonData[0].activities).to.include(skills_second);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -1967,6 +2480,49 @@
 		},
 		{
 			"name": "Find Schedule By Owner",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numEmployees = 1;",
+							"const employeeId = 8;",
+							"const date = \"2021-01-11\"",
+							"const numActivites = 2;",
+							"const skills_first = \"WALKING\";",
+							"const skills_second = \"PETTING\";",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numEmployees} employees`, () => {",
+							"    pm.expect(jsonData[0].employeeIds.length).to.be.eql(numEmployees);",
+							"});",
+							"",
+							"pm.test(`The response has ${numActivites} employees`, () => {",
+							"    pm.expect(jsonData[0].activities.length).to.be.eql(numActivites);",
+							"});",
+							"",
+							"",
+							"pm.test(`The response date ${date} correct`, () => {",
+							"    pm.expect(jsonData[0].date).equal(date);",
+							"});",
+							"",
+							"pm.test(`The response object has the right skills: ${skills_first} and ${skills_second}`, () => {",
+							"        pm.expect(jsonData[0].activities).to.include(skills_first);",
+							"        pm.expect(jsonData[0].activities).to.include(skills_second);    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -1982,7 +2538,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\"MONDAY\", \"TUESDAY\", \"FRIDAY\"]",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1990,7 +2546,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8082/schedule/customer/2",
+					"raw": "http://localhost:8082/schedule/customer/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1999,7 +2555,7 @@
 					"path": [
 						"schedule",
 						"customer",
-						"2"
+						"1"
 					]
 				}
 			},
@@ -2007,6 +2563,31 @@
 		},
 		{
 			"name": "Get All Customers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numCustomers = 3;",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numCustomers} customers`, () => {",
+							"    pm.expect(jsonData.length).to.be.eql(numCustomers);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -2046,6 +2627,30 @@
 		},
 		{
 			"name": "Get All Pets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numPets = 4;",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.length).to.be.eql(numPets);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -2084,6 +2689,30 @@
 		},
 		{
 			"name": "Get Pets By Owner",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const numPets = 2;",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.length).to.be.eql(numPets);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -2107,7 +2736,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8082/pet/owner/1",
+					"raw": "http://localhost:8082/pet/owner/2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -2116,7 +2745,7 @@
 					"path": [
 						"pet",
 						"owner",
-						"1"
+						"2"
 					]
 				}
 			},
@@ -2124,6 +2753,37 @@
 		},
 		{
 			"name": "Get Owner By Pet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"const customerName = \"Alex\"",
+							"const phoneNumber = \"123-456-7890\"",
+							"const numPets = 2;",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response values not null\", () => {",
+							"    pm.expect(jsonData).to.be.not.null;",
+							"});",
+							"",
+							"pm.test(`The response object name is ${customerName}`, () => {",
+							"    pm.expect(jsonData.name).equal(customerName);",
+							"});",
+							"",
+							"pm.test(`The response object has ${numPets} pets`, () => {",
+							"    pm.expect(jsonData.petIds.length).to.be.eql(numPets);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
