@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,10 +44,12 @@ public class UserController {
         this.petService = petService;
     }
 
-    @JsonView(Views.Public.class)
     @Transactional
     @PostMapping("/customer")
     public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
+
+        // TODO - if this is an update handle it.  Updates currently throwing errors and returning status code 500
+        // TODO - the bean utils copy is stepping on values if the dto is missing values.  Validate before copy.
         Long id = Optional.ofNullable(customerDTO.getId()).orElse(Long.valueOf(-1));
         Customer c = userService.findCustomer(id).orElseGet(Customer::new);
         BeanUtils.copyProperties(customerDTO, c, PROPERTIES_TO_IGNORE_ON_COPY);
@@ -59,21 +62,18 @@ public class UserController {
         return copyCustomerToDTO(c);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/customer")
     public List<CustomerDTO> getAllCustomers(){
         List<Customer> customers = userService.getAllCustomers();
         return copyCustomersToDTOs(customers);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/customer/pet/{petId}")
     public CustomerDTO getOwnerByPet(@PathVariable long petId) throws PetNotFoundException{
         Pet p = petService.findPet(petId).orElseThrow(() -> new PetNotFoundException("ID: " + petId));
         return copyCustomerToDTO(p.getOwner());
     }
 
-    @JsonView(Views.Public.class)
     @Transactional
     @PostMapping("/employee")
     public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
@@ -92,8 +92,7 @@ public class UserController {
         return copyEmployeeToDTO(e);
     }
 
-    @JsonView(Views.Public.class)
-    @PostMapping("/employee/{employeeId}")
+    @GetMapping("/employee/{employeeId}")
     public EmployeeDTO getEmployee(@PathVariable long employeeId) throws EmployeeNotFoundException {
         // is the id null?
         Long id = Optional.ofNullable(employeeId).orElse(Long.valueOf(-1));
@@ -101,7 +100,6 @@ public class UserController {
         return copyEmployeeToDTO(e);
     }
 
-    @JsonView(Views.Public.class)
     @Transactional
     @PutMapping("/employee/{employeeId}")
     public void setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) throws EmployeeNotFoundException {
@@ -110,13 +108,14 @@ public class UserController {
         userService.save(e);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/employee/availability")
-    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) throws MissingParameterException {
+    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeRequestDTO) throws MissingParameterException {
         // got skills?
-        Set<EmployeeSkill> skills = Optional.ofNullable(employeeDTO.getSkills())
-                .orElseThrow(() -> new MissingParameterException("Employee skills missing."));
-        List<Employee> employees = userService.findEmployeesBySkill(skills);
+        Set<EmployeeSkill> skills = Optional.ofNullable(employeeRequestDTO.getSkills())
+                .orElseThrow(() -> new MissingParameterException("Request is missing employee skills required."));
+        LocalDate date = Optional.ofNullable(employeeRequestDTO.getDate())
+                .orElseThrow(() -> new MissingParameterException("Request is missing the date."));
+        List<Employee> employees = userService.findAvailableEmployees(skills, date);
         return employees.stream().map(this::copyEmployeeToDTO).collect(Collectors.toList());
     }
 

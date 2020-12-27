@@ -23,7 +23,6 @@ public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.Public.class)
     private Long id;
 
     @ManyToMany
@@ -35,7 +34,6 @@ public class Schedule {
     )
     @JsonBackReference
     @JsonIgnoreProperties("schedules")
-    @JsonView(Views.Public.class)
     private List<Employee> employees;
 
     @ManyToMany
@@ -47,10 +45,8 @@ public class Schedule {
     )
     @JsonBackReference
     @JsonIgnoreProperties("schedules")
-    @JsonView(Views.Public.class)
     private List<Pet> pets;
 
-    @JsonView(Views.Public.class)
     private LocalDate date;
 
     @ElementCollection
@@ -58,7 +54,6 @@ public class Schedule {
             name="schedule_activities",
             joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "SKILL"}))
     @Column(name="activities")
-    @JsonView(Views.Public.class)
     private Set<EmployeeSkill> activities;
 
 

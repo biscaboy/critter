@@ -16,10 +16,8 @@ import javax.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.Public.class)
     private Long id;
 
     @Column(length=500)
-    @JsonView(Views.Public.class)
     private String name;
 }

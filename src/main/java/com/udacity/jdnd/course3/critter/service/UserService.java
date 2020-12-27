@@ -11,6 +11,8 @@ import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,10 +55,10 @@ public class UserService {
         return customerRepository.findOptionalByPetId(id).orElseThrow(() -> new EmployeeNotFoundException("ID: " + id));
     }
 
-    public List<Employee> findEmployeesBySkill(Set<EmployeeSkill> skills) {
+    public List<Employee> findAvailableEmployees(Set<EmployeeSkill> skills, LocalDate date) {
         // if there is more than one skill Hibernate does not support queries on @EnumeratedCollections
         // So get the ids of the employees with all skills and then pull just those employees from the database.
-        List<Long> employeesIds = employeeManagedRepository.findEmployeeIdsWithAllSkills(skills);
+        List<Long> employeesIds = employeeManagedRepository.findEmployeeIdsWithAllSkillsOnDay(skills, date.getDayOfWeek());
         List<Employee> employees = employeeRepository.findAllById(employeesIds);
         return employees;
     }

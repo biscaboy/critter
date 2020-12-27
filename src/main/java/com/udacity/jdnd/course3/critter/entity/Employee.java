@@ -21,23 +21,20 @@ import java.util.Set;
 @Table(name="employee")
 public class Employee extends User {
 
-    @JsonView(Views.Public.class)
     @ElementCollection
     @CollectionTable(
             name="employee_skill",
-            joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "SKILL"}))
+            joinColumns = @JoinColumn(name="id"), uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "SKILL"}))
     @Column(name="skill")
     private Set<EmployeeSkill> skills;
 
-    @JsonView(Views.Public.class)
     @ElementCollection
     @CollectionTable(
             name="day_of_week",
-            joinColumns = @JoinColumn(name="id"))//, uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "DAY"}))
+            joinColumns = @JoinColumn(name="id"), uniqueConstraints = @UniqueConstraint(columnNames = {"ID", "DAY"}))
     @Column(name="day")
     private Set<DayOfWeek> daysAvailable;
 
-    @JsonView(Views.Internal.class)
     @ManyToMany(
             mappedBy = "employees")
     @LazyCollection(LazyCollectionOption.TRUE)

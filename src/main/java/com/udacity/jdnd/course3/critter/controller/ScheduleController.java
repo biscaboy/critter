@@ -6,9 +6,7 @@ import com.udacity.jdnd.course3.critter.entity.Customer;
 import com.udacity.jdnd.course3.critter.entity.Employee;
 import com.udacity.jdnd.course3.critter.entity.Pet;
 import com.udacity.jdnd.course3.critter.entity.Schedule;
-import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
-import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
-import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
+import com.udacity.jdnd.course3.critter.exceptions.*;
 import com.udacity.jdnd.course3.critter.filter.Views;
 import com.udacity.jdnd.course3.critter.service.PetService;
 import com.udacity.jdnd.course3.critter.service.ScheduleService;
@@ -42,16 +40,20 @@ public class ScheduleController {
     @Autowired
     UserService userService;
 
-    @JsonView(Views.Public.class)
     @Transactional
     @PostMapping
-    public ScheduleDTO createSchedule(@RequestBody ScheduleDTO scheduleDTO) throws EmployeeNotFoundException, PetNotFoundException {
+    public ScheduleDTO createSchedule(@RequestBody ScheduleDTO scheduleDTO)
+            throws EmployeeNotFoundException, PetNotFoundException,
+                   MissingParameterException, EmployeeNotAvaliableException {
+        validateDTO(scheduleDTO);
+
         long scheduleId = Optional.ofNullable(scheduleDTO.getId()).orElse(-1L);
 
         Schedule s = scheduleService
                 .findSchedule(Long.valueOf(scheduleId))
                 .orElseGet(Schedule::new);
-        BeanUtils.copyProperties(scheduleDTO, s);
+
+        s = copyDTOToSchedule(scheduleDTO, s);
         s.setEmployees(userService.findEmployees(scheduleDTO.getEmployeeIds()));
         s.setPets(petService.findPets(scheduleDTO.getPetIds()));
 
@@ -72,28 +74,24 @@ public class ScheduleController {
         return copyScheduleToDTO(s);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping
     public List<ScheduleDTO> getAllSchedules() {
         List<Schedule> schedules = scheduleService.findAllSchedules();
         return copyScheduleToDTO(schedules);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/pet/{petId}")
     public List<ScheduleDTO> getScheduleForPet(@PathVariable long petId) throws PetNotFoundException {
         Pet p = petService.findPet(petId).orElseThrow(() -> new PetNotFoundException("ID: " + petId));
         return copyScheduleToDTO(p.getSchedules());
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/employee/{employeeId}")
     public List<ScheduleDTO> getScheduleForEmployee(@PathVariable long employeeId) {
         Employee e = userService.findEmployee(employeeId);
         return copyScheduleToDTO(e.getSchedules());
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/customer/{customerId}")
     public List<ScheduleDTO> getScheduleForCustomer(@PathVariable long customerId) throws CustomerNotFoundException {
         Customer c = userService.findCustomer(customerId)
@@ -105,6 +103,16 @@ public class ScheduleController {
                 .collect(Collectors.toList());
 
         return copyScheduleToDTO(customerSchedules);
+    }
+
+    private Schedule copyDTOToSchedule(ScheduleDTO dto, Schedule s) {
+        if (dto.getDate() != null) {
+            s.setDate(dto.getDate());
+        }
+        if (dto.getActivities() != null && dto.getActivities().size() > 0) {
+            s.setActivities(dto.getActivities());
+        }
+        return s;
     }
 
     private List<ScheduleDTO> copyScheduleToDTO(List<Schedule> schedules) {
@@ -122,4 +130,32 @@ public class ScheduleController {
         return dto;
     }
 
+    private void validateDTO(ScheduleDTO dto) throws MissingParameterException {
+        // TODO rewrite using reflection and reuse with other DTOs.
+        String message = "Missing request parameter(s): ";
+        int count = 0;
+        if (dto.getDate() == null) {
+            message += "service date";
+            count++;
+        }
+        if (dto.getActivities() == null || dto.getActivities().size() == 0) {
+            message = (count > 0) ? message + ", " : message;
+            message += "activites";
+            count++;
+        }
+        if (dto.getEmployeeIds() == null || dto.getEmployeeIds().size() == 0) {
+            message = (count > 0) ? message + ", " : message;
+            message += "Employee id(s)";
+            count++;
+        }
+        if (dto.getPetIds() == null || dto.getPetIds().size() == 0) {
+            message = (count > 0) ? message + ", " : message;
+            message += "Pet id(s)";
+            count++;
+
+        }
+        if (count > 0) {
+            throw new MissingParameterException(message + ".");
+        }
+    }
 }

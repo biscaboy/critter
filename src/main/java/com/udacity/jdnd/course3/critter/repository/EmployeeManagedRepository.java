@@ -1,12 +1,14 @@
 package com.udacity.jdnd.course3.critter.repository;
 
 import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
+import com.udacity.jdnd.course3.critter.entity.Schedule;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigInteger;
+import java.time.DayOfWeek;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,8 +24,6 @@ public class EmployeeManagedRepository {
      *
      * The instances of the count should match the number of skills sent to the method.
      *
-     * TODO test for more than two.
-     *
      * NOTE - Hibernate does not have a way to execute a query to find
      * all employees that have ALL skills.  The only way I could solve this
      * problem was with a native query.
@@ -31,17 +31,19 @@ public class EmployeeManagedRepository {
      * @param skillsSet
      * @return
      */
-    public List<Long> findEmployeeIdsWithAllSkills(Set<EmployeeSkill> skillsSet) {
+    public List<Long> findEmployeeIdsWithAllSkillsOnDay(Set<EmployeeSkill> skillsSet, DayOfWeek dayOfWeek) {
         // query to return a list of ids that include all the given skills.
         String selectStmt = "select e.id " +
-                "FROM Employee AS e, Employee_Skill AS es " +
+                "FROM Employee AS e, Employee_Skill AS es, Day_of_week AS d " +
                 "WHERE e.id = es.id " +
+                "AND e.id = d.id " +
                 "AND es.skill in (" +
                     skillsSet
                         .stream()
                         .map((skill) -> { return String.valueOf(skill.ordinal()); })
                         .collect(Collectors.joining(",")) +
-                ") GROUP BY e.id HAVING count(es.skill) = " + skillsSet.size();
+                ") AND d.day = " + dayOfWeek.ordinal() + " " +
+                "GROUP BY e.id HAVING count(es.skill) = " + skillsSet.size();
 
         // Create the query and set parameters
         Query selectQuery = entityManager.createNativeQuery(selectStmt);

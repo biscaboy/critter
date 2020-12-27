@@ -35,7 +35,6 @@ public class PetController {
     UserService userService;
 
     @Transactional
-    @JsonView(Views.Public.class)
     @PostMapping("/{ownerId}")
     public PetDTO updatePet(@PathVariable(name="ownerId") Long ownerId, @RequestBody PetDTO petDTO){
         petDTO.setOwnerId(ownerId);
@@ -43,7 +42,6 @@ public class PetController {
     }
 
     @Transactional
-    @JsonView(Views.Public.class)
     @PostMapping
     public PetDTO savePet(@RequestBody PetDTO petDTO) throws CustomerNotFoundException, MissingParameterException {
         // is the id null?
@@ -75,7 +73,6 @@ public class PetController {
         return dto;
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/{petId}")
     public PetDTO getPet(@PathVariable long petId) throws PetNotFoundException {
         PetDTO dto = new PetDTO();
@@ -85,14 +82,12 @@ public class PetController {
         return dto;
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping
     public List<PetDTO> getPets(){
         List<Pet> pets = petService.findAllPets();
         return copyPetsToPetsDTO(pets);
     }
 
-    @JsonView(Views.Public.class)
     @GetMapping("/owner/{ownerId}")
     public List<PetDTO> getPetsByOwner(@PathVariable long ownerId) {
         List<Pet> pets = petService.findPetByOwner(Long.valueOf(ownerId));

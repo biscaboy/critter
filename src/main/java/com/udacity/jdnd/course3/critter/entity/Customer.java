@@ -19,14 +19,11 @@ import java.util.List;
 @Table(name="customer")
 public class Customer extends User {
 
-    @JsonView(Views.Public.class)
     private String phoneNumber;
 
-    @JsonView(Views.Public.class)
     @Column(length=5000)
     private String notes;
 
-    @JsonView(Views.Internal.class)
     @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "owner", orphanRemoval = true)
     @LazyCollection(LazyCollectionOption.TRUE)
     @JsonIgnoreProperties("owner")
