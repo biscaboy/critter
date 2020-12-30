@@ -5,12 +5,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 //@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Required information was missing from the request.")
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class MissingParameterException extends RuntimeException {
+public class MissingDataException extends RuntimeException {
 
-    public MissingParameterException() {
+    public MissingDataException() {
     }
 
-    public MissingParameterException(String message) {
+    public MissingDataException(String message) {
         super(message);
     }
 }

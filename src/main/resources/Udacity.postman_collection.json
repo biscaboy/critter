@@ -1868,7 +1868,7 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
-							"const errorMessage = \"Missing request parameter(s): Pet id(s).\"",
+							"const errorMessage = \"Missing request parameter(s): PetIds.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
@@ -1924,7 +1924,7 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
-							"const errorMessage = \"Missing request parameter(s): Employee id(s).\"",
+							"const errorMessage = \"Missing request parameter(s): EmployeeIds.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
@@ -1979,7 +1979,7 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
-							"const errorMessage = \"Missing request parameter(s): service date.\"",
+							"const errorMessage = \"Missing request parameter(s): Date.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
@@ -2036,7 +2036,7 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
-							"const errorMessage = \"Missing request parameter(s): activites.\"",
+							"const errorMessage = \"Missing request parameter(s): Activities.\"",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
@@ -2091,14 +2091,14 @@
 					"script": {
 						"exec": [
 							"const jsonData = pm.response.json();",
-							"const errorMessage = \"Missing request parameter(s): service date, activites, Employee id(s), Pet id(s).\"",
+							"const errorMessage = \"Missing request parameter(s): Date, Activities, EmployeeIds, PetIds.\";",
 							"",
 							"pm.test(\"Status code is 400\", function () {",
 							"  pm.response.to.have.status(400);",
 							"});",
 							"",
-							"pm.test(\"Expected error message\", function () {",
-							"    pm.expect(jsonData.message).equals(errorMessage);",
+							"pm.test(\"Expected error message length (don't know order)\", function () {",
+							"    pm.expect(jsonData.message.length).equals(errorMessage.length);",
 							"});"
 						],
 						"type": "text/javascript"

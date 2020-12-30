@@ -1,11 +1,8 @@
 package com.udacity.jdnd.course3.critter.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.udacity.jdnd.course3.critter.dto.PetDTO;
-import com.udacity.jdnd.course3.critter.entity.Customer;
 import com.udacity.jdnd.course3.critter.entity.Pet;
-import com.udacity.jdnd.course3.critter.exceptions.MissingParameterException;
-import com.udacity.jdnd.course3.critter.filter.Views;
+import com.udacity.jdnd.course3.critter.exceptions.MissingDataException;
 import com.udacity.jdnd.course3.critter.service.PetService;
 import com.udacity.jdnd.course3.critter.service.UserService;
 import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
@@ -41,13 +38,10 @@ public class PetController {
         return savePet(petDTO);
     }
 
-    @Transactional
     @PostMapping
-    public PetDTO savePet(@RequestBody PetDTO petDTO) throws CustomerNotFoundException, MissingParameterException {
+    public PetDTO savePet(@RequestBody PetDTO petDTO) throws CustomerNotFoundException, MissingDataException {
         // is the id null?
         long petId = Optional.ofNullable(petDTO.getId()).orElse(-1L);
-        Long ownerId = Optional.ofNullable(petDTO.getOwnerId())
-                .orElseThrow(() -> new MissingParameterException("Owner ID missing."));
 
         // get the pet if it exists
         Pet p = petService.findPet(Long.valueOf(petId)).orElseGet(Pet::new);
@@ -55,16 +49,8 @@ public class PetController {
         // copy user input to the existing pet
         BeanUtils.copyProperties(petDTO, p, PROPERTIES_TO_IGNORE_ON_COPY);
 
-        // get the owner ids
-        Customer owner = userService.findCustomer(ownerId)
-                .orElseThrow(() -> new CustomerNotFoundException("ID: " + ownerId));
-        p.setOwner(owner);
-        // save the merged customer and get the updated copy
-        p = petService.save(p);
-
-        // update the owner
-        owner.getPets().add(p);
-        userService.save(owner);
+        // save the pet to the owner.
+        p = petService.save(p, petDTO.getOwnerId());
 
         // return the updated DTO
         PetDTO dto = new PetDTO();

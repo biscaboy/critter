@@ -6,20 +6,23 @@ import com.udacity.jdnd.course3.critter.controller.UserController;
 import com.udacity.jdnd.course3.critter.dto.CustomerDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeDTO;
 import com.udacity.jdnd.course3.critter.dto.EmployeeRequestDTO;
-import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
+import com.udacity.jdnd.course3.critter.entity.*;
 import com.udacity.jdnd.course3.critter.controller.PetController;
 import com.udacity.jdnd.course3.critter.dto.PetDTO;
-import com.udacity.jdnd.course3.critter.entity.PetType;
 import com.udacity.jdnd.course3.critter.controller.ScheduleController;
 import com.udacity.jdnd.course3.critter.dto.ScheduleDTO;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
+import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
+import com.udacity.jdnd.course3.critter.service.PetService;
+import com.udacity.jdnd.course3.critter.service.UserService;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ import java.util.stream.IntStream;
  */
 @Transactional
 @SpringBootTest(classes = CritterApplication.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CritterFunctionalTest {
 
     @Autowired
@@ -46,7 +50,17 @@ public class CritterFunctionalTest {
     @Autowired
     private ScheduleController scheduleController;
 
+    /**
+     *  Service Layer classes added for additional tests.
+     */
+    @Autowired
+    private PetService petService;
+
+    @Autowired
+    private UserService userService;
+
     @Test
+    @Order(1)
     public void testCreateCustomer(){
         CustomerDTO customerDTO = createCustomerDTO();
         CustomerDTO newCustomer = userController.saveCustomer(customerDTO);
@@ -57,6 +71,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(2)
     public void testCreateEmployee(){
         EmployeeDTO employeeDTO = createEmployeeDTO();
         EmployeeDTO newEmployee = userController.saveEmployee(employeeDTO);
@@ -67,6 +82,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(3)
     public void testAddPetsToCustomer() {
         CustomerDTO customerDTO = createCustomerDTO();
         CustomerDTO newCustomer = userController.saveCustomer(customerDTO);
@@ -92,6 +108,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(4)
     public void testFindPetsByOwner() {
         CustomerDTO customerDTO = createCustomerDTO();
         CustomerDTO newCustomer = userController.saveCustomer(customerDTO);
@@ -110,6 +127,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(5)
     public void testFindOwnerByPet() {
         CustomerDTO customerDTO = createCustomerDTO();
         CustomerDTO newCustomer = userController.saveCustomer(customerDTO);
@@ -124,6 +142,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(6)
     public void testChangeEmployeeAvailability() {
         EmployeeDTO employeeDTO = createEmployeeDTO();
         EmployeeDTO emp1 = userController.saveEmployee(employeeDTO);
@@ -137,6 +156,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(7)
     public void testFindEmployeesByServiceAndTime() {
         EmployeeDTO emp1 = createEmployeeDTO();
         EmployeeDTO emp2 = createEmployeeDTO();
@@ -174,6 +194,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(8)
     public void testSchedulePetsForServiceWithEmployee() {
         EmployeeDTO employeeTemp = createEmployeeDTO();
         employeeTemp.setDaysAvailable(Sets.newHashSet(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY));
@@ -198,6 +219,7 @@ public class CritterFunctionalTest {
     }
 
     @Test
+    @Order(9)
     public void testFindScheduleByEntities() {
         ScheduleDTO sched1 = populateSchedule(1, 2, LocalDate.of(2019, 12, 25), Sets.newHashSet(EmployeeSkill.FEEDING, EmployeeSkill.WALKING));
         ScheduleDTO sched2 = populateSchedule(3, 1, LocalDate.of(2019, 12, 26), Sets.newHashSet(EmployeeSkill.PETTING));
@@ -254,6 +276,99 @@ public class CritterFunctionalTest {
         compareSchedules(sched3, scheds2c.get(1));
     }
 
+    @Test
+    @DisplayName("Additional Test: PetNotFoundException message")
+    @Order(10)
+    public void testPetNotFoundException (){
+        Long nonExistingId = 1000L;
+        String expectedMessage = "Could not find pet(s) with id(s): " + nonExistingId;
+        String actualMessage = null;
+        Customer customer = createCustomer();
+        List<Long> idList = new ArrayList<>();
+        customer = userService.save(customer, idList);
+        Pet pet = createPet("Figaro", PetType.CAT);
+        pet = petService.save(pet, customer.getId());
+        idList.add(pet.getId());
+        idList.add(nonExistingId);
+
+        Assertions.assertThrows(PetNotFoundException.class, () -> {
+            petService.findPets(idList);
+        });
+        // one missing id
+        try {
+            petService.findPets(idList);
+        } catch (PetNotFoundException petNotFoundException){
+            actualMessage = petNotFoundException.getMessage();
+        }
+        Assertions.assertEquals(expectedMessage, actualMessage);
+
+        // two missing ids
+        nonExistingId++;
+        expectedMessage += ", " + nonExistingId;
+        idList.add(nonExistingId);
+        try {
+            petService.findPets(idList);
+        } catch (PetNotFoundException petNotFoundException){
+            actualMessage = petNotFoundException.getMessage();
+        }
+        Assertions.assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    @DisplayName("Additional Test: EmployeeNotFoundException message")
+    @Order(11)
+    public void testEmployeeNotFoundExceptionMessage (){
+        Long nonExistingId = 1000L;
+        String expectedMessage = "Could not find employee(s) with id(s): " + nonExistingId;
+        String actualMessage = null;
+        Employee employee = createEmployee();
+        employee = userService.save(employee);
+        List<Long> idList = new ArrayList<>();
+        idList.add(employee.getId());
+        idList.add(nonExistingId);
+
+        Assertions.assertThrows(EmployeeNotFoundException.class, () -> {
+            userService.findEmployees(idList);
+        });
+        // one missing id
+        try {
+            userService.findEmployees(idList);
+        } catch (EmployeeNotFoundException employeeNotFoundException){
+            actualMessage = employeeNotFoundException.getMessage();
+        }
+        Assertions.assertEquals(expectedMessage, actualMessage);
+
+        // two missing ids
+        nonExistingId++;
+        expectedMessage += ", " + nonExistingId;
+        idList.add(nonExistingId);
+        try {
+            userService.findEmployees(idList);
+        } catch (EmployeeNotFoundException employeeNotFoundException){
+            actualMessage = employeeNotFoundException.getMessage();
+        }
+        Assertions.assertEquals(expectedMessage, actualMessage);
+    }
+
+    private static Pet createPet(String name, PetType type) {
+        Pet pet = new Pet();
+        pet.setName(name);
+        pet.setType(type);
+        return pet;
+    }
+
+    private static Employee createEmployee() {
+        Employee employee = new Employee();
+        employee.setName("TestEmployee");
+        return employee;
+    }
+
+    private static Customer createCustomer() {
+        Customer customer = new Customer();
+        customer.setName("TestEmployee");
+        customer.setPhoneNumber("123-456-789");
+        return customer;
+    }
 
     private static EmployeeDTO createEmployeeDTO() {
         EmployeeDTO employeeDTO = new EmployeeDTO();
