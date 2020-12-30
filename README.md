@@ -28,6 +28,9 @@ This project required utilizing data persistence concepts including:
 * [Spring Data JPA - Reference Documentation 2.4.2](https://docs.spring.io/spring-data/jpa/docs/current/reference/html)
 * [Spring Data JPA - Reference Documentation 2.1.21](https://docs.spring.io/spring-data/jpa/docs/2.1.x/reference/html/)
 
+#### Postman
+* [Postman Javascript Reference](https://learning.postman.com/docs/writing-scripts/script-references/postman-sandbox-api-reference/)
+* [Test script examples](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/)
 
 #### Baeldung.com
 
@@ -38,6 +41,9 @@ This project required utilizing data persistence concepts including:
 * [Use Criteria Queries in a Spring Data Application](https://www.baeldung.com/spring-data-criteria-queries)
 * [Guide to the Hibernate EntityManager](https://www.baeldung.com/hibernate-entitymanager)
 * [Guide to the Java 8 forEach](https://www.baeldung.com/foreach-java)
+* [Error Handling for REST with Spring](https://www.baeldung.com/exception-handling-for-rest-with-spring)
+* [Retrieve Fields from a Java Class Using Reflection](https://www.baeldung.com/java-reflection-class-fields)
+* [The Order of Test in JUnit by Fatos Morina ](https://www.baeldung.com/junit-5-test-order)
 
 #### StackOverflow.com
 * [Pascal Thivent - Querying Relationships Using Joins](https://stackoverflow.com/questions/3424696/jpa-criteria-api-how-to-add-join-clause-as-general-sentence-as-possible)
@@ -52,7 +58,12 @@ This project required utilizing data persistence concepts including:
 * [Vlad Dobrydin - org.hibernate.hql.internal.ast.QuerySyntaxException: table is not mapped](https://stackoverflow.com/questions/23018836/org-hibernate-hql-internal-ast-querysyntaxexception-table-is-not-mapped)
 * [Oliver Drotbohm - Spring CrudRepository ... equivalent to IN clause](https://stackoverflow.com/questions/18987292/spring-crudrepository-findbyinventoryidslistlong-inventoryidlist-equivalen)
 * [Fuury - Spring Data JPA findBy a collection [duplicate]](https://stackoverflow.com/questions/53619322/spring-data-jpa-findby-a-collection)
-
+* [Counting records in JSON array using javascript and Postman](https://stackoverflow.com/questions/35987043/counting-records-in-json-array-using-javascript-and-postman)
+* [brainimus - Hibernate - A collection with cascade=”all-delete-orphan” was no longer referenced by the owning entity instance](https://stackoverflow.com/questions/5587482/hibernate-a-collection-with-cascade-all-delete-orphan-was-no-longer-referenc)
+* [Derek Kromm - Only return rows if sum is greater than a value](https://stackoverflow.com/questions/16320362/only-return-rows-if-sum-is-greater-than-a-value)
+* [Louis Wasserman - Java 8 method references: provide a Supplier capable of supplying a parameterized result](https://stackoverflow.com/questions/22917138/java-8-method-references-provide-a-supplier-capable-of-supplying-a-parameterize)
+* [Marius - Reflection generic get field value](https://stackoverflow.com/questions/13400075/reflection-generic-get-field-value)
+* [Retrieving the data type for an object using reflection](https://stackoverflow.com/questions/24670772/retrieving-the-data-type-for-an-object-using-reflection)
 
 #### Oracle
 * [The Java EE 6 Tutorial - Criteria Queries](https://docs.oracle.com/javaee/6/tutorial/doc/gjivm.html)
@@ -63,10 +74,14 @@ This project required utilizing data persistence concepts including:
 * [Pivotal Engineering Journal - Must-Know Spring Boot Annotations: Controllers](https://engineering.pivotal.io/post/must-know-spring-boot-annotations-controllers/)
 * [Callicoder - JPA Many to Many Mappings](https://www.callicoder.com/hibernate-spring-boot-jpa-many-to-many-mapping-example/)
 * [ConcretePage.com - JPA EntityManager](https://www.concretepage.com/java/jpa/jpa-entitymanager-and-entitymanagerfactory-example-using-hibernate-with-persist-find-contains-detach-merge-and-remove)
+* [ConcretePage.com - Convert Java Stream to String](https://www.concretepage.com/java/java-10/convert-java-stream-to-string)
 * [Codata.com - How to use CriteriaBuilder](https://www.codota.com/code/java/classes/javax.persistence.criteria.CriteriaBuilder)
 * [JavaCodeExamples - Get Elements by Index from HashSet in Java](https://www.javacodeexamples.com/get-elements-by-index-from-hashset-in-java-example/2772)
 * [Hibernate Reference Documentation](https://docs.jboss.org/hibernate/orm/3.3/reference/en/html/index.html)
 * [Buggy Bread - Spring Framework List of Exceptions](https://www.buggybread.com/2015/03/spring-framework-list-of-exceptions.html)
+* [HowToDoInJava.com - JUnit 5 Expected Exception – assertThrows() Example](https://howtodoinjava.com/junit5/expected-exception-example/)
+* [admfactory.com - Get and Set Field Value using Reflection in Java](https://www.admfactory.com/get-and-set-field-value-using-reflection-in-java/)
+* [attacomsian.com - Capitalize the first letter of a string in Java](https://attacomsian.com/blog/capitalize-first-letter-of-string-java)
 
 ## Built With
 
@@ -77,4 +92,4 @@ This project required utilizing data persistence concepts including:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md]()
+This project is licensed under the [MIT License](https://mit-license.org/)
