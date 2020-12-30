@@ -60,13 +60,14 @@ public class ScheduleService {
         s.setEmployees(userService.findEmployees(employeeIds));
         s.setPets(petService.findPets(petIds));
 
-        // validate the employee has the skills and is available for the date given
-        List<Long> availableEmployeeIds = employeeManagedRepository.findEmployeeIdsWithAllSkillsOnDay(s.getActivities(), s.getDate().getDayOfWeek());
-        for (Employee e : s.getEmployees()) {
-            if (!availableEmployeeIds.contains(e.getId())){
-                throw new EmployeeNotAvaliableException();
-            }
-        }
+        // TODO Get information from mentors why this type of validation cannot be performed to include in submission.
+//        // validate the employee has the skills and is available for the date given
+//        List<Long> availableEmployeeIds = employeeManagedRepository.findEmployeeIdsWithAllSkillsOnDay(s.getActivities(), s.getDate().getDayOfWeek());
+//        for (Employee e : s.getEmployees()) {
+//            if (!availableEmployeeIds.contains(e.getId())){
+//                throw new EmployeeNotAvaliableException();
+//            }
+//        }
 
         s = scheduleRepository.save(s);
 
