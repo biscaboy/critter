@@ -80,6 +80,12 @@ public class UserController {
         return copyEmployeeToDTO(e);
     }
 
+    @GetMapping("/employees")
+    public List<EmployeeDTO> getEmployees() {
+        List<Employee> employees = userService.findEmployees();
+        return employees.stream().map((e) -> {return copyEmployeeToDTO(e);}).collect(Collectors.toList());
+    }
+
     @Transactional
     @PutMapping("/employee/{employeeId}")
     public void setAvailability(@RequestBody Set<DayOfWeek> daysAvailable, @PathVariable long employeeId) throws EmployeeNotFoundException {

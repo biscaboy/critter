@@ -11,8 +11,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,25 +27,29 @@ public class ScheduleController {
     ScheduleService scheduleService;
 
     @Autowired
+    UserService userService;
+
+    @Autowired
+    PetService petService;
+
+    @Autowired
     ValidationService validationService;
 
     @PostMapping
     public ScheduleDTO createSchedule(@RequestBody ScheduleDTO scheduleDTO)
             throws EmployeeNotFoundException, PetNotFoundException,
-            MissingDataException, EmployeeNotAvaliableException {
+            MissingDataException {
 
         validationService.validatePOJOAttributesNotNullOrEmpty(scheduleDTO);
 
-        long scheduleId = Optional.ofNullable(scheduleDTO.getId()).orElse(-1L);
-
-        Schedule s = scheduleService
-                .findSchedule(Long.valueOf(scheduleId))
-                .orElseGet(Schedule::new);
+        Schedule s = scheduleService.findSchedule(scheduleDTO.getId()).orElseGet(Schedule::new);
 
         s.setDate(scheduleDTO.getDate());
         s.setActivities(scheduleDTO.getActivities());
+        s.setEmployees(userService.findEmployees(scheduleDTO.getEmployeeIds()));
+        s.setPets(petService.findPets(scheduleDTO.getPetIds()));
 
-        s = scheduleService.save(s, scheduleDTO.getEmployeeIds(), scheduleDTO.getPetIds());
+        s = scheduleService.save(s);
 
         return copyScheduleToDTO(s);
     }

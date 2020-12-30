@@ -1,7 +1,6 @@
 package com.udacity.jdnd.course3.critter.repository;
 
 import com.udacity.jdnd.course3.critter.entity.EmployeeSkill;
-import com.udacity.jdnd.course3.critter.entity.Schedule;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;

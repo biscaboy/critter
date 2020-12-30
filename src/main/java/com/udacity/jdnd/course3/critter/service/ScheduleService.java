@@ -5,7 +5,6 @@ import com.udacity.jdnd.course3.critter.entity.Employee;
 import com.udacity.jdnd.course3.critter.entity.Pet;
 import com.udacity.jdnd.course3.critter.entity.Schedule;
 import com.udacity.jdnd.course3.critter.exceptions.CustomerNotFoundException;
-import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotAvaliableException;
 import com.udacity.jdnd.course3.critter.exceptions.EmployeeNotFoundException;
 import com.udacity.jdnd.course3.critter.exceptions.PetNotFoundException;
 import com.udacity.jdnd.course3.critter.repository.*;
@@ -39,9 +38,6 @@ public class ScheduleService {
     @Autowired
     CustomerRepository customerRepository;
 
-    @Autowired
-    EmployeeManagedRepository employeeManagedRepository;
-
     public Optional<Schedule> findSchedule(Long id) {
         return scheduleRepository.findById(id);
     }
@@ -51,23 +47,8 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Schedule save(Schedule s, List<Long> employeeIds, List<Long> petIds)
-            throws PetNotFoundException, EmployeeNotAvaliableException, EmployeeNotFoundException {
-
-        // Validate and populate
-        // populate the schedule with Pets and Employees
-        // use the service calls as these services validate if all ids are found.
-        s.setEmployees(userService.findEmployees(employeeIds));
-        s.setPets(petService.findPets(petIds));
-
-        // TODO Get information from mentors why this type of validation cannot be performed to include in submission.
-//        // validate the employee has the skills and is available for the date given
-//        List<Long> availableEmployeeIds = employeeManagedRepository.findEmployeeIdsWithAllSkillsOnDay(s.getActivities(), s.getDate().getDayOfWeek());
-//        for (Employee e : s.getEmployees()) {
-//            if (!availableEmployeeIds.contains(e.getId())){
-//                throw new EmployeeNotAvaliableException();
-//            }
-//        }
+    public Schedule save(Schedule s)
+            throws PetNotFoundException, EmployeeNotFoundException {
 
         s = scheduleRepository.save(s);
 

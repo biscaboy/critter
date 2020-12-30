@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,5 +89,9 @@ public class UserService {
             throw new EmployeeNotFoundException("Could not find employee(s) with id(s): " + missing);
         }
         return employees;
+    }
+
+    public List<Employee> findEmployees() {
+        return employeeRepository.findAll();
     }
 }
