@@ -31,7 +31,6 @@ public class PetController {
     @Autowired
     UserService userService;
 
-    @Transactional
     @PostMapping("/{ownerId}")
     public PetDTO updatePet(@PathVariable(name="ownerId") Long ownerId, @RequestBody PetDTO petDTO){
         petDTO.setOwnerId(ownerId);
