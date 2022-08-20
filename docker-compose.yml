@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  app:
+    image: biscaboy/critter
+    container_name: critter-app
+    ports:
+      - 8082:8082
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-critter:3306/critter
+      SPRING_DATASOURCE_USERNAME: critter_sa
+      SPRING_DATASOURCE_PASSWORD: 32I#peX!*l3jh
+      SPRING_DATASOURCE_INITIALIZATION_MODE: ALWAYS
+    networks:
+      - critter-net
+
+  mysql-critter:
+    image: mysql/mysql-server:latest
+    container_name: mysql-critter
+    environment:
+      MYSQL_DATABASE: critter
+      MYSQL_USER: critter_sa
+      MYSQL_PASSWORD: 32I#peX!*l3jh
+    networks:
+      - critter-net
+
+networks:
+  critter-net:
+    name: critter-net
